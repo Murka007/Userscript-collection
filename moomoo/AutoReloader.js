@@ -62,12 +62,20 @@
     })
 
     // Handle WebSocket close and error events
-    window.WebSocket = class extends WebSocket {
-        constructor(...args) {
-            super(...args);
-            this.addEventListener("close", () => reload());
-            this.addEventListener("error", () => reload());
-        }
+    function handleWebsocket(method) {
+        const set = Object.getOwnPropertyDescriptor(WebSocket.prototype, method).set;
+        Object.defineProperty(WebSocket.prototype, method, {
+            set(callback) {
+                return set.call(this, new Proxy(callback, {
+                    apply(target, _this, args) {
+                        reload();
+                        return target.apply(_this, args);
+                    }
+                }))
+            }
+        })
     }
+    handleWebsocket("onclose");
+    handleWebsocket("onerror");
 
 })();
