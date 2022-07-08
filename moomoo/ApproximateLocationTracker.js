@@ -3,7 +3,7 @@
 // @author Murka
 // @description Shows approximate location of enemies on the map
 // @icon https://moomoo.io/img/favicon.png?v=1
-// @version 0.1
+// @version 0.2
 // @match *://moomoo.io/*
 // @match *://*.moomoo.io/*
 // @run-at document-start
@@ -18,6 +18,11 @@
     Github: https://github.com/Murka007
     Discord: https://discord.gg/sG9cyfGPj5
     Greasyfork: https://greasyfork.org/en/users/919633
+
+    How does it work?
+    - It shows a notification on the map when some player breaks an object
+    - You should see the object at least once to make notifications work
+    - It works even better on sandbox
 */
 
 (function() {
