@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name Moomoo.io Enemy location tracker
 // @author Murka
-// @description Shows approximate location of enemies on the map
+// @description Shows approximate location of enemies on the map. Using this script you can easily find players in the game
 // @icon https://moomoo.io/img/favicon.png?v=1
-// @version 0.3
+// @version 0.4
 // @match *://moomoo.io/*
 // @match *://*.moomoo.io/*
 // @run-at document-start
