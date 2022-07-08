@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name Approximate location tracker
+// @name Moomoo.io Enemy location tracker
 // @author Murka
 // @description Shows approximate location of enemies on the map
 // @icon https://moomoo.io/img/favicon.png?v=1
-// @version 0.2
+// @version 0.3
 // @match *://moomoo.io/*
 // @match *://*.moomoo.io/*
 // @run-at document-start
