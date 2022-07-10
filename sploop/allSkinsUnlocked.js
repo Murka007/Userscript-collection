@@ -3,7 +3,7 @@
 // @author Murka
 // @description Unlocks ALL skins in the game! Select any skins you want!
 // @icon https://sploop.io/img/ui/favicon.png
-// @version 0.1
+// @version 0.2
 // @match *://sploop.io/*
 // @run-at document-start
 // @grant none
@@ -31,14 +31,24 @@
 
     const log = console.log;
 
-    function createHook(target, prop, callback) {
+    function createHook(target, prop, setter) {
+        if (!window.hooks) {
+            window.hooks = {
+                setter: [],
+                getter: []
+            };
+        }
+        window.hooks.setter.push(setter);
+
         const symbol = Symbol(prop);
         Object.defineProperty(target, prop, {
             get() {
                 return this[symbol];
             },
             set(value) {
-                callback(this, symbol, value);
+                for (const setter of window.hooks.setter) {
+                    setter(this, symbol, value);
+                }
             },
             configurable: true
         })
@@ -115,6 +125,26 @@
         return settings;
     })();
 
+    const myPlayer = {
+        id: null,
+        data: null
+    };
+
+    window.WebSocket = new Proxy(WebSocket, {
+        construct(target, args) {
+            const socket = new target(...args);
+            socket.addEventListener("message", function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data[0] === 35) {
+                        myPlayer.id = data[1];
+                    }
+                } catch(err) {}
+            })
+            return socket;
+        }
+    })
+
     function getDefault() {
         return {
             skin: storage.get("skin") || 0,
@@ -123,48 +153,41 @@
         };
     }
 
-    let myPlayer = null;
-    createHook(Object.prototype, "type", async function(that, symbol, value) {
+    createHook(Object.prototype, "i", async function(that, symbol, value) {
         that[symbol] = value;
-        if (value !== 0 || !inGame() || myPlayer) return;
-        await sleep(0);
+        if (myPlayer.id === value) {
+            myPlayer.data = that;
+            await sleep(0);
 
-        const skinData = storage.get("selectedSkins");
-        const Default = getDefault();
+            const skinData = storage.get("selectedSkins");
+            const Default = getDefault();
 
-        const keys = Object.keys(that);
-        if (!KEY.SKIN) KEY.SKIN = keys[INDEX.SKIN];
-        if (!KEY.ACCESSORY) KEY.ACCESSORY = keys[INDEX.ACCESSORY];
-        if (!KEY.BACK) KEY.BACK = keys[INDEX.BACK];
+            const keys = Object.keys(that);
+            if (!KEY.SKIN) KEY.SKIN = keys[INDEX.SKIN];
+            if (!KEY.ACCESSORY) KEY.ACCESSORY = keys[INDEX.ACCESSORY];
+            if (!KEY.BACK) KEY.BACK = keys[INDEX.BACK];
 
-        const current = {
-            skin: that[KEY.SKIN] || 0,
-            accessory: that[KEY.ACCESSORY] || 0,
-            back: that[KEY.BACK] || 0
-        };
+            const current = {
+                skin: that[KEY.SKIN] || 0,
+                accessory: that[KEY.ACCESSORY] || 0,
+                back: that[KEY.BACK] || 0
+            };
 
-        // Skin will not change if you are not logged into your account
-        // And also you can't even select any skins without account, except default one
-        if (
-            current.skin === Default.skin &&
-            current.accessory === Default.accessory &&
-            current.back === Default.back
-        ) {
-            myPlayer = that;
+            // Skin will not change if you are not logged into your account
+            // And also you can't even select any skins without account, except default one
             defineProperty(that, KEY.SKIN, skinData.skin || Default.skin);
             defineProperty(that, KEY.ACCESSORY, skinData.accessory || Default.accessory);
             defineProperty(that, KEY.BACK, skinData.back || Default.back);
         }
-    })
+    });
 
     // We need to reset our skins on death/change server
     function resetSkins() {
-        if (myPlayer === null) return;
+        if (myPlayer.data === null) return;
         const { skin, accessory, back } = getDefault();
-        defineProperty(myPlayer, KEY.SKIN, skin);
-        defineProperty(myPlayer, KEY.ACCESSORY, accessory);
-        defineProperty(myPlayer, KEY.BACK, back);
-        myPlayer = null;
+        defineProperty(myPlayer.data, KEY.SKIN, skin);
+        defineProperty(myPlayer.data, KEY.ACCESSORY, accessory);
+        defineProperty(myPlayer.data, KEY.BACK, back);
     }
 
     window.addEventListener("load", function() {
