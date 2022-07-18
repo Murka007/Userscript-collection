@@ -3,7 +3,7 @@
 // @author Murka
 // @description Allows to change zoom of the game using mouse wheels
 // @icon https://moomoo.io/img/favicon.png?v=1
-// @version 0.5
+// @version 0.6
 // @match *://moomoo.io/*
 // @match *://*.moomoo.io/*
 // @run-at document-start
@@ -44,6 +44,17 @@
             configurable: true
         })
     }
+
+    createHook(window, "config", function(that, symbol, value) {
+        if (typeof value === "object" && value.hasOwnProperty("maxScreenHeight")) {
+            delete window.config;
+            Object.defineProperty(window, "config", {
+                value: value,
+                configurable: false,
+                writeable: false
+            })
+        }
+    })
 
     // Bypass checkTrusted, so it will just return a callback
     createHook(Object.prototype, "checkTrusted", function(that, symbol, value) {
