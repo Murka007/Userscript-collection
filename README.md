@@ -1,5 +1,6 @@
-# Userscript-collection
-My collection of userscripts that I made
+# Userscript collection
 
-None of these userscripts can be called a project.<br>
-This repository is intended to store a lot of small scripts
+Here is my collection of userscripts. If you find it interesting, feel free to use it.
+
+### I need your feedback on:
+- [GreasyFork](https://greasyfork.org/en/users/919633) 
